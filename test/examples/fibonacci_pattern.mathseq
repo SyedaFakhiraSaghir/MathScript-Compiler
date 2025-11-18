@@ -1,0 +1,31 @@
+# Fibonacci + pattern detection example
+func fibonacci(n: int) -> sequence {
+    let a: int = 0
+    let b: int = 1
+    let result: sequence = [a, b]
+    
+    while length(result) < n {
+        let next: int = a + b
+        result = result + [next]
+        a = b
+        b = next
+    }
+    
+    return result
+}
+
+func main() -> int {
+    let count: int = 10
+    let fib_sequence: sequence = fibonacci(count)
+    
+    print "Fibonacci sequence: " fib_sequence
+    
+    if length(fib_sequence) > 5 and fib_sequence[0] == 0 {
+        print "Pattern matched: Sequence starts with 0 and has more than 5 elements"
+    } else {
+        print "Pattern not matched"
+    }
+    
+    return 0
+}
+
