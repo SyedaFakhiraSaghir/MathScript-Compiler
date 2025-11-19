@@ -269,8 +269,8 @@ Compiler ke saath yeh options use kar sakte hain:
 ### 1. Simple Program (`simple.mathseq`)
 ```mathseq
 func main() -> int {
-    let a: int = 1
-    print a
+    let value: int = input("Enter an integer:")
+    print "You entered: " value
     return 0
 }
 ```
@@ -295,7 +295,7 @@ func fibonacci(n: int) -> sequence {
 }
 
 func main() -> int {
-    let count: int = 10
+    let count: int = input("How many Fibonacci numbers?")
     let fib_sequence: sequence = fibonacci(count)
     print "Fibonacci sequence: " fib_sequence
     return 0
@@ -304,30 +304,39 @@ func main() -> int {
 
 **Kya karta hai?** Fibonacci sequence generate karta hai.
 
-### 3. Arithmetic Operations (`arithmetic.mathseq`)
+### 3. Calculator Demo (`arithmetic.mathseq`)
 ```mathseq
-func calculate(a: int, b: int) -> int {
-    let sum: int = a + b
-    let product: int = a * b
-    let difference: int = a - b
-    
-    if sum > product {
-        return sum
-    } else {
-        return product
-    }
+func calculate(a: int, b: int, choice: int) -> int {
+    if choice == 1 { return a + b }
+    else if choice == 2 { return a - b }
+    else if choice == 3 { return a * b }
+    else if choice == 4 { return a / b }
+    else if choice == 5 { return a % b }
+    return 0
 }
 
 func main() -> int {
-    let x: int = 15
-    let y: int = 3
-    let result: int = calculate(x, y)
-    print "Result: " result
+    let x: int = input("Enter integer 1:")
+    let y: int = input("Enter integer 2:")
+    print "1:+  2:-  3:*  4:/  5:%"
+    let choice: int = input("Pick operation (1-5):")
+    
+    if choice < 1 or choice > 5 {
+        print "Invalid operation selected."
+        return 0
+    }
+    if (choice == 4 or choice == 5) and y == 0 {
+        print "Division/modulo by zero allowed nahi hai."
+        return 0
+    }
+    
+    let result: int = calculate(x, y, choice)
+    print "Answer: " result
     return 0
 }
 ```
 
-**Kya karta hai?** Arithmetic operations perform karta hai.
+**Kya karta hai?** User se 2 numbers + operation choice lekar real-time calculator banata hai (add/subtract/multiply/divide/modulo) aur invalid inputs handle karta hai.
 
 ---
 
@@ -383,6 +392,16 @@ Project successfully run hone ke baad:
 
 ---
 
+## User Input ko Dynamic Kaise Banaya Gaya? 🙋‍♂️
+
+- Ab saare default examples (simple, arithmetic, fibonacci, fibonacci_squared, fibonacci_pattern) `input("Prompt text")` function istemal karte hain.
+- `input` user se integer leta hai. Prompt string optional hai, lekin agar do ge to console pe show hogi (e.g. `input("Enter first number:")`).
+- Manual run karte waqt jab `bin\mathseqc.exe test/examples/...` chalate ho to prompt aayega aur tum value type kar sakte ho.
+- `run.ps1` script automatically har example ke liye kuch default answers feed kar deta hai taake automation block na ho; lekin tum chaaho to script ko `-Example simple` jaisa filter de kar sirf ek program bhi run kar sakte ho aur phir apne inputs provide kar sakte ho.
+- Is se project ab static hard-coded numbers se free ho gaya hai aur har test case runtime pe user-driven data leta hai.
+
+---
+
 ## Helpful Resources 📖
 
 - **README.md** - Project documentation
@@ -390,4 +409,12 @@ Project successfully run hone ke baad:
 - **Example files** - `test/examples/` directory mein
 
 **Happy Compiling! 🎉**
+
+bin\mathseqc.exe test\examples\fibonacci.mathseq -output fibonacci.asm → sirf "Fibonacci sequence: [...]"
+
+bin\mathseqc.exe test\examples\arithmetic.mathseq -output arithmetic.asm → sirf x/y/result lines
+
+bin\mathseqc.exe test\examples\fibonacci_squared.mathseq -output fibonacci_squared.asm → sirf Fibonacci + Squared lines
+
+bin\mathseqc.exe test\examples\fibonacci_pattern.mathseq -output fibonacci_pattern.asm → sirf Fibonacci + Pattern status
 
