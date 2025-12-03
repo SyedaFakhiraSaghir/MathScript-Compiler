@@ -19,7 +19,7 @@ func square(x: int) -> int {
 }
 
 func main() -> int {
-    let count: int = 10
+    let count: int = input("How many Fibonacci numbers?")
     let fib_sequence: sequence = fibonacci(count)
     let squared_sequence: sequence = map(fib_sequence, square)
     

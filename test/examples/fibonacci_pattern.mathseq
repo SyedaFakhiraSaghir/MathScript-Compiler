@@ -15,13 +15,16 @@ func fibonacci(n: int) -> sequence {
 }
 
 func main() -> int {
-    let count: int = 10
+    let count: int = input("How many Fibonacci numbers?")
+    let minLength: int = input("Minimum length to match?")
+    let requiredStart: int = input("Required starting value?")
+    
     let fib_sequence: sequence = fibonacci(count)
     
     print "Fibonacci sequence: " fib_sequence
     
-    if length(fib_sequence) > 5 and fib_sequence[0] == 0 {
-        print "Pattern matched: Sequence starts with 0 and has more than 5 elements"
+    if length(fib_sequence) > minLength and fib_sequence[0] == requiredStart {
+        print "Pattern matched!"
     } else {
         print "Pattern not matched"
     }

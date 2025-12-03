@@ -1,5 +1,6 @@
 func main() -> int {
-    let a: int = 1
-    print a
+    
+    let value: int = input("Enter an integer:")
+    print "You entered: " value
     return 0
 }

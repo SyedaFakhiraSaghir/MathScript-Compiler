@@ -16,7 +16,7 @@ func fibonacci(n: int) -> sequence {
 
 # Main program
 func main() -> int {
-    let count: int = 10
+    let count: int = input("How many Fibonacci numbers?")
     let fib_sequence: sequence = fibonacci(count)
     print "Fibonacci sequence: " fib_sequence
     return 0

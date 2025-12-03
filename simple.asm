@@ -3,12 +3,15 @@
 ; =======================
 
 main:
-a = 1
-param 1
-t0 = call print, 1
+param Enter an integer:
+t0 = call input, Enter an integer:
+value = t0
+param You entered: 
+param value
+t1 = call print, You entered: , value
 return 0
 
 ; Program Output
 ; --------------
-; 1
+; You entered:  5
 ; Exit Code: 0

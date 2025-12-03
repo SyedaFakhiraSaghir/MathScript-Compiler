@@ -78,6 +78,7 @@ let first: int = seq[0]
 - `map(seq, func)` - Apply function to each element
 - `filter(seq, func)` - Filter sequence elements
 - `generate(...)` - Generate sequences
+- `input("prompt")` - Read an integer from user (optional prompt string)
 
 ## Installation
 
@@ -135,8 +136,8 @@ sudo make install
 ### Simple Program
 ```mathseq
 func main() -> int {
-    let a: int = 1
-    print a
+    let value: int = input("Enter an integer:")
+    print "You entered: " value
     return 0
 }
 ```
@@ -159,7 +160,7 @@ func fibonacci(n: int) -> sequence {
 }
 
 func main() -> int {
-    let count: int = 10
+    let count: int = input("How many Fibonacci numbers?")
     let fib_sequence: sequence = fibonacci(count)
     
     print "Fibonacci sequence: " fib_sequence
@@ -175,7 +176,7 @@ func square(x: int) -> int {
 }
 
 func main() -> int {
-    let count: int = 10
+    let count: int = input("How many Fibonacci numbers?")
     let fib_sequence: sequence = fibonacci(count)
     let squared_sequence: sequence = map(fib_sequence, square)
     
@@ -189,13 +190,15 @@ func main() -> int {
 ### Fibonacci Pattern Detection
 ```mathseq
 func main() -> int {
-    let count: int = 10
+    let count: int = input("How many Fibonacci numbers?")
+    let minLength: int = input("Minimum length to match?")
+    let requiredStart: int = input("Required starting value?")
     let fib_sequence: sequence = fibonacci(count)
     
     print "Fibonacci sequence: " fib_sequence
     
-    if length(fib_sequence) > 5 and fib_sequence[0] == 0 {
-        print "Pattern matched: Sequence starts with 0 and has more than 5 elements"
+    if length(fib_sequence) > minLength and fib_sequence[0] == requiredStart {
+        print "Pattern matched!"
     } else {
         print "Pattern not matched"
     }
@@ -204,27 +207,40 @@ func main() -> int {
 }
 ```
 
-### Arithmetic Operations
+### Interactive Calculator
 ```mathseq
-func calculate(a: int, b: int) -> int {
-    let sum: int = a + b
-    let product: int = a * b
-    let difference: int = a - b
-    
-    if sum > product {
-        return sum
-    } else {
-        return product
+func calculate(a: int, b: int, choice: int) -> int {
+    if choice == 1 {
+        return a + b
+    } else if choice == 2 {
+        return a - b
+    } else if choice == 3 {
+        return a * b
+    } else if choice == 4 {
+        return a / b
+    } else if choice == 5 {
+        return a % b
     }
+    return 0
 }
 
 func main() -> int {
-    let x: int = 15
-    let y: int = 3
-    let result: int = calculate(x, y)
+    let x: int = input("Enter integer 1:")
+    let y: int = input("Enter integer 2:")
+    print "1:Add  2:Subtract  3:Multiply  4:Divide  5:Modulo"
+    let choice: int = input("Select operation (1-5):")
     
-    print "Result: " result
+    if choice < 1 or choice > 5 {
+        print "Invalid operation selected."
+        return 0
+    }
+    if (choice == 4 or choice == 5) and y == 0 {
+        print "Cannot divide or modulo by zero."
+        return 0
+    }
     
+    let result: int = calculate(x, y, choice)
+    print "Answer: " result
     return 0
 }
 ```

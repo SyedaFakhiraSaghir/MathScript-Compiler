@@ -427,6 +427,8 @@ Interpreter::RuntimeValue Interpreter::evaluateCall(CallExpr* expr) {
         return handleFilter(expr);
     } else if (funcName == "generate") {
         return handleGenerate(expr);
+    } else if (funcName == "input") {
+        return handleInput(expr);
     }
     
     std::vector<RuntimeValue> args;
@@ -555,5 +557,57 @@ std::string Interpreter::extractFunctionName(Expr* expr) {
         return variable->name.lexeme;
     }
     throw std::runtime_error("Runtime error: expected function identifier");
+}
+
+Interpreter::RuntimeValue Interpreter::handleInput(CallExpr* expr) {
+    if (expr->arguments.size() > 1) {
+        throw std::runtime_error("Runtime error: input expects at most 1 argument");
+    }
+    
+    if (!expr->arguments.empty()) {
+        RuntimeValue prompt = evaluateExpression(expr->arguments[0].get());
+        std::string promptText = prompt.toString();
+        if (!promptText.empty()) {
+            std::cout << promptText << " ";
+        }
+    }
+    std::cout << "> " << std::flush;
+    
+    std::string line;
+    if (!std::getline(std::cin, line)) {
+        return RuntimeValue::FromInt(0);
+    }
+    
+    auto trim = [](std::string& s) {
+        size_t start = s.find_first_not_of(" \t\r\n");
+        size_t end = s.find_last_not_of(" \t\r\n");
+        if (start == std::string::npos) {
+            s.clear();
+            return;
+        }
+        s = s.substr(start, end - start + 1);
+    };
+    
+    trim(line);
+    if (line.empty()) {
+        return RuntimeValue::FromInt(0);
+    }
+    
+    try {
+        size_t idx = 0;
+        long long value = std::stoll(line, &idx, 10);
+        if (idx == line.length()) {
+            return RuntimeValue::FromInt(value);
+        }
+    } catch (...) {
+        // Fall through to floating-point parsing
+    }
+    
+    try {
+        double value = std::stod(line);
+        return RuntimeValue::FromInt(static_cast<long long>(value));
+    } catch (...) {
+        return RuntimeValue::FromInt(0);
+    }
 }
 

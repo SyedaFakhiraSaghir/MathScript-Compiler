@@ -1,41 +1,5 @@
-<<<<<<< HEAD
-# Helper script to run the compiler easily
-# Usage: .\run.ps1 [source-file] [options]
-
-param(
-    [Parameter(Mandatory=$true, Position=0)]
-    [string]$SourceFile,
-    
-    [Parameter(ValueFromRemainingArguments=$true)]
-    [string[]]$Options
-)
-
-$ProjectDir = "MathScript-Compiler-main"
-$CompilerPath = Join-Path $ProjectDir "bin\mathseqc.exe"
-
-if (-not (Test-Path $CompilerPath)) {
-    Write-Host "Error: Compiler not found at $CompilerPath" -ForegroundColor Red
-    Write-Host "Please build it first with: .\make release" -ForegroundColor Yellow
-    exit 1
-}
-
-# Convert forward slashes to backslashes if needed
-$SourceFile = $SourceFile -replace '/', '\'
-
-# If relative path, try to resolve it relative to project directory or current directory
-if (-not [System.IO.Path]::IsPathRooted($SourceFile)) {
-    # Try relative to project directory first
-    $TestPath1 = Join-Path $ProjectDir $SourceFile
-    if (Test-Path $TestPath1) {
-        $SourceFile = $TestPath1
-    }
-    # If not found, try current directory (might be in project dir already)
-    elseif (-not (Test-Path $SourceFile)) {
-        Write-Host "Error: Could not find file: $SourceFile" -ForegroundColor Red
-        Write-Host "Tried: $TestPath1 and $SourceFile" -ForegroundColor Yellow
-=======
 # PowerShell Run Script for MathSeq Compiler
-# This script will build and run the compiler with example files
+# This script builds the compiler (release mode) and runs selected examples.
 
 param(
     [string]$Example = "all"
@@ -52,8 +16,27 @@ Write-Host ""
 Write-Host "Step 1: Building the compiler..." -ForegroundColor Yellow
 & powershell -ExecutionPolicy Bypass -File build.ps1 -Mode release
 
+$exampleInputs = @{
+    "simple" = @("5")
+    "arithmetic" = @("15", "3", "1")
+    "fibonacci" = @("10")
+    "fibonacci_squared" = @("10")
+    "fibonacci_pattern" = @("10", "5", "0")
+}
+
+function Get-FilteredExamples {
+    param($Example)
+    $files = @()
+    if (Test-Path "test\examples") {
+        $files = Get-ChildItem "test\examples\*.mathseq" -ErrorAction SilentlyContinue
+    }
+    if ($Example -and $Example.ToLower() -ne "all") {
+        $files = $files | Where-Object { $_.BaseName.ToLower() -eq $Example.ToLower() }
+    }
+    return $files
+}
+
 if ($LASTEXITCODE -eq 0) {
-    # Build successful with native Windows compiler
     Write-Host ""
     Write-Host "Build successful!" -ForegroundColor Green
     $TARGET = "bin\mathseqc.exe"
@@ -63,14 +46,9 @@ if ($LASTEXITCODE -eq 0) {
         Write-Host "Step 2: Running compiler with examples..." -ForegroundColor Yellow
         Write-Host ""
         
-        # Get all test files
-        $testFiles = @()
-        if (Test-Path "test\examples") {
-            $testFiles = Get-ChildItem "test\examples\*.mathseq" -ErrorAction SilentlyContinue
-        }
-        
+        $testFiles = Get-FilteredExamples -Example $Example
         if ($testFiles.Count -eq 0) {
-            Write-Host "No test files found in test\examples\" -ForegroundColor Yellow
+            Write-Host "No matching test files found in test\examples\" -ForegroundColor Yellow
         } else {
             foreach ($file in $testFiles) {
                 Write-Host "=====================================" -ForegroundColor Cyan
@@ -78,13 +56,17 @@ if ($LASTEXITCODE -eq 0) {
                 Write-Host "=====================================" -ForegroundColor Cyan
                 Write-Host ""
                 
-                & $TARGET $file.FullName -ast -output "$($file.BaseName).asm"
+                if ($exampleInputs.ContainsKey($file.BaseName)) {
+                    $inputData = ($exampleInputs[$file.BaseName] -join "`n") + "`n"
+                    $inputData | & $TARGET $file.FullName -ast -output "$($file.BaseName).asm"
+                } else {
+                    & $TARGET $file.FullName -ast -output "$($file.BaseName).asm"
+                }
                 Write-Host ""
             }
         }
     }
 } else {
-    # Try WSL
     Write-Host ""
     Write-Host "Native compiler not found. Trying WSL..." -ForegroundColor Yellow
     
@@ -98,14 +80,9 @@ if ($LASTEXITCODE -eq 0) {
             Write-Host "Step 2: Running compiler with examples..." -ForegroundColor Yellow
             Write-Host ""
             
-            # Get all test files
-            $testFiles = @()
-            if (Test-Path "test\examples") {
-                $testFiles = Get-ChildItem "test\examples\*.mathseq" -ErrorAction SilentlyContinue
-            }
-            
+            $testFiles = Get-FilteredExamples -Example $Example
             if ($testFiles.Count -eq 0) {
-                Write-Host "No test files found in test\examples\" -ForegroundColor Yellow
+                Write-Host "No matching test files found in test\examples\" -ForegroundColor Yellow
             } else {
                 foreach ($file in $testFiles) {
                     Write-Host "=====================================" -ForegroundColor Cyan
@@ -113,11 +90,21 @@ if ($LASTEXITCODE -eq 0) {
                     Write-Host "=====================================" -ForegroundColor Cyan
                     Write-Host ""
                     
-                    # Convert Windows path to WSL path
                     $wslPath = $file.FullName -replace "C:", "/mnt/c" -replace "\\", "/"
                     $wslOutput = "$($file.BaseName).asm"
                     
-                    & wsl $TARGET $wslPath -ast -output $wslOutput
+                    if ($exampleInputs.ContainsKey($file.BaseName)) {
+                        $inputData = ($exampleInputs[$file.BaseName] -join "`n") + "`n"
+                        $tempFile = New-TemporaryFile
+                        Set-Content -Path $tempFile -Value $inputData -Encoding UTF8
+                        try {
+                            Get-Content $tempFile | & wsl $TARGET $wslPath -ast -output $wslOutput
+                        } finally {
+                            Remove-Item $tempFile -ErrorAction SilentlyContinue
+                        }
+                    } else {
+                        & wsl $TARGET $wslPath -ast -output $wslOutput
+                    }
                     Write-Host ""
                 }
             }
@@ -145,23 +132,11 @@ if ($LASTEXITCODE -eq 0) {
         Write-Host "  2. After reboot, run: wsl (to initialize)" -ForegroundColor Yellow
         Write-Host "  3. Install build tools in WSL: sudo apt update && sudo apt install -y build-essential" -ForegroundColor Yellow
         Write-Host "  4. Then run: wsl make release" -ForegroundColor Yellow
->>>>>>> 601c4fd (Initial push after zip extraction)
         exit 1
     }
 }
 
-<<<<<<< HEAD
-# Build the command
-$cmd = "& `"$CompilerPath`" `"$SourceFile`""
-if ($Options) {
-    $cmd += " $Options"
-}
-
-# Run the compiler
-Invoke-Expression $cmd
-=======
 Write-Host "=====================================" -ForegroundColor Green
 Write-Host "Done! Compiler built and tested." -ForegroundColor Green
 Write-Host "=====================================" -ForegroundColor Green
->>>>>>> 601c4fd (Initial push after zip extraction)
 

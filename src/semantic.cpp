@@ -42,6 +42,7 @@ void SemanticAnalyzer::analyzeProgram(Program* program) {
     symbolManager.declareSymbol("filter", DataType::SEQUENCE, true);
     symbolManager.declareSymbol("length", DataType::INT, true);
     symbolManager.declareSymbol("get", DataType::INT, true);  // For array indexing
+    symbolManager.declareSymbol("input", DataType::INT, true);
     
     // First pass: declare all functions
     for (auto& function : program->functions) {
@@ -382,6 +383,16 @@ DataType SemanticAnalyzer::analyzeCallExpression(CallExpr* callExpr) {
             analyzeExpression(arg.get());
         }
         return DataType::SEQUENCE;
+    } else if (funcName == "input") {
+        if (callExpr->arguments.size() > 1) {
+            addError("Function 'input' expects 0 or 1 argument", callExpr->callee.line);
+        } else if (callExpr->arguments.size() == 1) {
+            DataType promptType = analyzeExpression(callExpr->arguments[0].get());
+            if (promptType != DataType::SEQUENCE && promptType != DataType::UNKNOWN) {
+                addError("Function 'input' expects a string literal prompt", callExpr->callee.line);
+            }
+        }
+        return DataType::INT;
     }
     
     // User-defined function

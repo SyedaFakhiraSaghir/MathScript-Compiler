@@ -1,5 +1,5 @@
 ; MathSeq Compiler Output
-; Source: C:\Users\22K-4646\Desktop\MathScript-Compiler-main\MathScript-Compiler-main\MathScript-Compiler-main\test\examples\fibonacci_squared.mathseq
+; Source: test\examples\fibonacci_squared.mathseq
 ; =======================
 
 fibonacci:
@@ -32,24 +32,26 @@ x = param_x
 t6 = x * x
 return t6
 main:
-count = 10
-param 10
-t7 = call fibonacci, 10
-fib_sequence = t7
+param How many Fibonacci numbers?
+t7 = call input, How many Fibonacci numbers?
+count = t7
+param count
+t8 = call fibonacci, count
+fib_sequence = t8
 param fib_sequence
 param square
-t8 = call map, fib_sequence, square
-squared_sequence = t8
+t9 = call map, fib_sequence, square
+squared_sequence = t9
 param Fibonacci sequence: 
 param fib_sequence
-t9 = call print, Fibonacci sequence: , fib_sequence
+t10 = call print, Fibonacci sequence: , fib_sequence
 param Squared sequence: 
 param squared_sequence
-t10 = call print, Squared sequence: , squared_sequence
+t11 = call print, Squared sequence: , squared_sequence
 return 0
 
 ; Program Output
 ; --------------
-; Fibonacci sequence:  [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
-; Squared sequence:  [0, 1, 1, 4, 9, 25, 64, 169, 441, 1156]
+; Fibonacci sequence:  [0, 1]
+; Squared sequence:  [0, 1]
 ; Exit Code: 0

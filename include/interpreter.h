@@ -84,6 +84,7 @@ private:
     RuntimeValue handleMap(CallExpr* expr);
     RuntimeValue handleFilter(CallExpr* expr);
     RuntimeValue handleGenerate(CallExpr* expr);
+    RuntimeValue handleInput(CallExpr* expr);
     
     std::string extractFunctionName(Expr* expr);
 };
